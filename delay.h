@@ -20,5 +20,5 @@ void delay_ms(uint32_t ms);
 /// Delays the given amount of microseconds.
 void delay_us(uint32_t us);
 
-/// Function for initializing the high-speed clock
+/// Initialize the high speed clock.
 void hs_clock_init();

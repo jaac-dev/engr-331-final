@@ -12,6 +12,8 @@ static inline void gpio_enable_clock(GPIO_TypeDef *block) {
 		RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
 	else if (block == GPIOD)
 		RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
+	else if (block == GPIOE)
+		RCC->AHB1ENR |= RCC_AHB1ENR_GPIOEEN;
 }
 
 static inline uint32_t gpio_block_index(GPIO_TypeDef *block) {
@@ -19,6 +21,7 @@ static inline uint32_t gpio_block_index(GPIO_TypeDef *block) {
   if (block == GPIOB) return 1;
   if (block == GPIOC) return 2;
   if (block == GPIOD) return 3;
+	if (block == GPIOE) return 4;
   return 0;
 }
 

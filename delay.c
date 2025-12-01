@@ -23,7 +23,7 @@ void delay_us_inner(uint32_t us) {
 void delay_us(uint32_t us) {
 	while (us) {
 		uint16_t chunk = (us > 0xFFFF) ? 0xFFFF : (uint16_t)us;
-		delay_us(chunk);
+		delay_us_inner(chunk);
 		us -= chunk;
 	}
 }

@@ -104,7 +104,7 @@ int keypad_scan(uint8_t col) {
 	gpio_write(key_gpio,r2,false);
 	
 	// move onto row 3
-	gpio_write(key_gpio,r2,true);
+	gpio_write(key_gpio,r3,true);
 	delay_ms(1);
 	// check if row 3 contains the button press
 	if (gpio_read(key_gpio,pin)){
