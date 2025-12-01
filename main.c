@@ -61,25 +61,7 @@ int main() {
 __enable_irq();
 	
 	while (1) {
-		if (!g_count_changed) continue;
-		g_count_changed = false; // Handle the change.
-		
-		// Output the new number.
-		lcd_set_pos(&lcd_a, A_OFFSET, false);
-		lcd_set_pos(&lcd_b, B_OFFSET, false);
-		
-		// Clear the remaining 40 - A_OFFSET or B_OFFSET chars.
-		for (int i = 0; i < 40 - A_OFFSET; i++)
-			lcd_print_char(&lcd_a, ' ');
-		
-		for (int i = 0; i < 40 - B_OFFSET; i++)
-			lcd_print_char(&lcd_b, ' ');
-		
-		lcd_set_pos(&lcd_a, A_OFFSET, false);
-		lcd_set_pos(&lcd_b, B_OFFSET, false);
-		
-		lcd_printf(&lcd_a, "%d", g_count);
-		lcd_printf(&lcd_b, "%d", g_count * 8);
+		__WFI(); // Wait for interrupt.
 	}
 	return 0;
 }

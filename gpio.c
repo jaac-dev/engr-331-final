@@ -9,9 +9,9 @@ static inline void gpio_enable_clock(GPIO_TypeDef *block) {
 	else if (block == GPIOB)
 		RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
 	else if (block == GPIOC)
-			RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
+		RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
 	else if (block == GPIOD)
-			RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
+		RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
 }
 
 static inline uint32_t gpio_block_index(GPIO_TypeDef *block) {

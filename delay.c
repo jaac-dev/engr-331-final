@@ -3,32 +3,28 @@
 void delay_init() {
 	// Enable the timer for TIM6.
 	RCC->APB1ENR |= RCC_APB1ENR_TIM6EN;
+	
+	TIM6->PSC = 84 - 1;
+	TIM6->ARR = 0xFFFF;
+	TIM6->CNT = 0;
+	TIM6->CR1 = TIM_CR1_CEN;
 }
 
 void delay_ms(uint32_t ms) {
-	for (uint32_t i = 0; i < ms; i++) {
-		TIM6->CR1 &= ~TIM_CR1_CEN;
-		TIM6->PSC = 83;
-		TIM6->ARR = 999;
-		TIM6->CNT = 0;
-		TIM6->CR1 |= TIM_CR1_CEN;
-		while (!(TIM6->SR & TIM_SR_UIF));
-		TIM6->SR = 0;
-		TIM6->CR1 &= ~TIM_CR1_CEN;
-	}
+	while (ms--)
+		delay_us(1000);
+}
+
+void delay_us_inner(uint32_t us) {
+	uint16_t start = TIM6->CNT;
+	while ((uint16_t)(TIM6->CNT - start) < us) {}
 }
 
 void delay_us(uint32_t us) {
-	for (uint32_t i = 0; i < us; i++) {
-		TIM6->CR1 &= ~TIM_CR1_CEN;
-		TIM6->PSC = 15;
-		TIM6->ARR = 0;
-		TIM6->CNT = 0;
-		TIM6->SR = 0;
-		TIM6->CR1 |= TIM_CR1_CEN;
-		while (!(TIM6->SR & TIM_SR_UIF));
-		TIM6->SR = 0;
-		TIM6->CR1 &= ~TIM_CR1_CEN;
+	while (us) {
+		uint16_t chunk = (us > 0xFFFF) ? 0xFFFF : (uint16_t)us;
+		delay_us(chunk);
+		us -= chunk;
 	}
 }
 
