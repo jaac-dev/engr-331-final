@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stm32f407xx.h>
 
 ///
 /// Note: This system uses the TIM6 peripheral.
@@ -18,3 +19,6 @@ void delay_ms(uint32_t ms);
 
 /// Delays the given amount of microseconds.
 void delay_us(uint32_t us);
+
+/// Function for initializing the high-speed clock
+void hs_clock_init();

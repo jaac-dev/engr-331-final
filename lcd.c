@@ -1,11 +1,35 @@
 #include "lcd.h"
-#include "delay.h"
-#include "gpio.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <stdio.h>
+
+lcd_t lcd_def(GPIO_TypeDef *lcd_gpio, uint8_t rs, uint8_t en, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7) {
+	// Configure the pins.
+	gpio_configure_out(lcd_gpio, rs);
+	gpio_configure_out(lcd_gpio, en);
+	gpio_configure_out(lcd_gpio, d4);
+	gpio_configure_out(lcd_gpio, d5);
+	gpio_configure_out(lcd_gpio, d6);
+	gpio_configure_out(lcd_gpio, d7);
+	
+	// Setup the LCD.
+	lcd_t lcd_a;
+	lcd_a.rs_block = lcd_gpio;
+	lcd_a.rs_pin = rs;
+	lcd_a.en_block = lcd_gpio;
+	lcd_a.en_pin = en;
+	lcd_a.d4_block = lcd_gpio;
+	lcd_a.d4_pin = d4;
+	lcd_a.d5_block = lcd_gpio;
+	lcd_a.d5_pin = d5;
+	lcd_a.d6_block = lcd_gpio;
+	lcd_a.d6_pin = d6;
+	lcd_a.d7_block = lcd_gpio;
+	lcd_a.d7_pin = d7;
+
+	lcd_init(&lcd_a); 
+	
+	return lcd_a;
+}
+
 
 void lcd_init(lcd_t *self) {
 	// Initialize by instruction to get into 4-bit mode.
@@ -166,4 +190,10 @@ void lcd_printf(lcd_t *self, const char *fmt, ...) {
 
 void lcd_set_pos(lcd_t *self, uint8_t col, bool row) {
 	lcd_command_ddram_address(self, row ? col + 40 : col);
+}
+
+void lcd_print_int(lcd_t *self, uint8_t num) {
+	char num_buffer[32] = "";
+	snprintf(num_buffer,32,"%d",num);
+	lcd_print(self,num_buffer);
 }

@@ -1,16 +1,29 @@
 #pragma once
 
+#include <stm32f407xx.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include <stdio.h>
 
-#include <stm32f407xx.h>
+#include "delay.h"
+#include "gpio.h"
 
-#define LCD_RS 6
-#define LCD_EN 7
-#define LCD_D4 8
-#define LCD_D5 9
-#define LCD_D6 10
-#define LCD_D7 11
+#define LCDa_RS 6
+#define LCDa_EN 7
+#define LCDa_D4 8
+#define LCDa_D5 9
+#define LCDa_D6 10
+#define LCDa_D7 11
+
+#define LCDb_RS 0
+#define LCDb_EN 1
+#define LCDb_D4 2
+#define LCDb_D5 3
+#define LCDb_D6 4
+#define LCDb_D7 5
 
 /// The configuration structure used for LCD functions.
 typedef struct {
@@ -32,6 +45,9 @@ typedef struct {
 	GPIO_TypeDef *d7_block;
 	uint8_t d7_pin;
 } lcd_t;
+
+/// Function for initializing an LCD using its respective pin numbers and GPIO
+lcd_t lcd_def(GPIO_TypeDef *lcd_gpio, uint8_t rs, uint8_t en, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7);
 
 //=======================================//
 //            LCD: RAW ACCESS            //
@@ -119,3 +135,8 @@ void lcd_printf(lcd_t *self, const char *fmt, ...);
 /// @arg col The column.
 /// @arg row Whether or not to be on the second row.
 void lcd_set_pos(lcd_t *self, uint8_t col, bool row);
+
+/// function for printing an integer
+/// @arg self The LCD instance.
+/// @arg num The single-digit int
+void lcd_print_int(lcd_t *self, uint8_t num);

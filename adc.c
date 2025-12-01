@@ -1,6 +1,6 @@
 #include "adc.h"
 
-#include <stm32f407xx.h>
+
 
 void adc_init() {
 	RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
