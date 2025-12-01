@@ -44,7 +44,7 @@ int main() {
 	const int B_OFFSET = 11;
 	
 	lcd_print(&lcd_a, "Count: 0");
-	lcd_print(&lcd_b, "Count * 2: 0");
+	lcd_print(&lcd_b, "Count * 4: 0");
 	
 	while (1) {
 		if (!g_count_changed) continue;
@@ -65,7 +65,7 @@ int main() {
 		lcd_set_pos(&lcd_b, B_OFFSET, false);
 		
 		lcd_printf(&lcd_a, "%d", g_count);
-		lcd_printf(&lcd_b, "%d", g_count * 2);
+		lcd_printf(&lcd_b, "%d", g_count * 4);
 	}
 	
 	return 0;
