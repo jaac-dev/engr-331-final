@@ -1,28 +1,42 @@
 #include "adc.h"
 
-
-
 void adc_init() {
+	// Enable the ADC1 clock.
 	RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
 
-	// Common ADC Config.
-	ADC->CCR = 0;
-	ADC->CCR |= (1U << 16); // 1/4 prescalar.
+	// PCLK2 / 4 for the ADC prescalar.
+	ADC->CCR &= ~(3 << ADC_CCR_ADCPRE_Pos);
+	ADC->CCR |= (1 << ADC_CCR_ADCPRE_Pos);
 	
-	// ADC 1 Config.
-	ADC1->CR1 = 0;
-	ADC1->CR1 |= ADC_CR1_SCAN;
+	// Power on ADC1.
+	ADC1->CR2 |= ADC_CR2_ADON;
+}
+
+uint16_t adc_read(uint8_t channel) {
+	// Configure the channel to sample for 144 cycles.
+	if (channel <= 9) {
+		ADC1->SMPR2 &= ~(7 << (channel * 3));
+		ADC1->SMPR2 |= (6 << (channel * 3));
+	} else if (channel <= 18) {
+		ADC1->SMPR1 &= ~(7 << ((channel - 10) * 3));
+		ADC1->SMPR1 |= (6 << ((channel - 10) * 3));
+	} else {
+		return 0; // Invalid channel.
+	}
 	
-  ADC1->CR2 = 0;
-	ADC1->CR2 |= ADC_CR2_CONT;
-	ADC1->CR2 |= ADC_CR2_DMA;
-	ADC1->CR2 |= ADC_CR2_DDS;
+	// Clear out the sequence length, we only will perform one conversion.
+	ADC1->SQR1 &= ~(0xF << ADC_SQR1_L_Pos);
 	
-	// Set the sample rate for the 6 channels.
-	uint32_t s = 0b010;
-	uint32_t sr = 0;
-	for (int i = 0; i < 6; i++)
-		sr |= (s << (i * 3));
+	// Write the given channel into conversion 1.
+	ADC1->SQR3 &= ~0x1F;
+	ADC1->SQR3 |= channel & 0x1F;
 	
-	ADC1->SMPR2 = sr;
+	// Start the conversion.
+	ADC1->CR2 |= ADC_CR2_SWSTART;
+
+	// Wait for the EOC bit to be set.
+	while ((ADC1->SR & ADC_SR_EOC) == 0);
+	
+	// Return the converted value.
+	return ADC1->DR & 0x0FFF;
 }

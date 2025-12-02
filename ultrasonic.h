@@ -17,7 +17,7 @@ typedef struct {
 	ultrasonic_pin_t trig; 
 	
 	// The alternate function to use for ECHO.
-	// This needs to map to the specified timer and channel.
+	// This needs to map to the specified time320/58r and channel.
 	uint8_t echo_af;
 	
 	// The timer to use.
@@ -29,6 +29,10 @@ typedef struct {
 	// The two capture values for finding the pulse width.
 	volatile uint32_t v1; 
 	volatile uint32_t v2;
+	
+	volatile uint32_t pulse_width;
+	
+	volatile bool active;
 	
 	// False when reading rising edge, and true for falling.
 	volatile bool edge;

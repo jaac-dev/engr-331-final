@@ -25,7 +25,7 @@ void ultrasonic_init(ultrasonic_t *self) {
 	
 	echo->block->MODER &= ~(3 << (2 * echo->pin));
 	echo->block->MODER |= (2 << (2 * echo->pin)); // Alternate function mode.
-	echo->block->PUPDR &= ~(3 << (2 * echo->pin)); // No pull resistors.
+	echo->block->PUPDR &= ~(3 << (2 * echo->pin));
 	echo->block->PUPDR |=  (2U << (2 * echo->pin));
 	
 	uint8_t afr_idx   = echo->pin / 8;
@@ -44,6 +44,9 @@ void ultrasonic_init(ultrasonic_t *self) {
 	// 1 micro-second ticks.
 	timer->PSC = 83;
 	timer->ARR = 0xFFFFFFFF;
+	
+	// Update the timer.
+  timer->EGR |= TIM_EGR_UG;
 	
 	// Map the given channel to TI1, enable rising edge trigger.
 	switch (timer_channel) {
@@ -109,6 +112,9 @@ void ultrasonic_interrupt(ultrasonic_t *self) {
 	TIM_TypeDef *timer = self->timer;
 	timer->SR = 0;
 	
+	if (!self->active)
+		return;
+	
 	uint32_t value = read_ccr(timer, self->timer_channel);
 	
 	if (!self->edge) {
@@ -124,19 +130,26 @@ void ultrasonic_interrupt(ultrasonic_t *self) {
 		self->edge = false;
 		timer->CCER &= ~(0b0010 << (4 * (self->timer_channel - 1)));
 		
+		self->pulse_width = self->v2 >= self->v1 ? 
+			self->v2 - self->v1 : (0xFFFFFFFF - self->v1) + self->v2 + 1;
+		
 		// Signal that we're done reading.
 		self->done = true;
+		self->active = false;
 	}
 }
 
 float ultrasonic_read(ultrasonic_t *self) {
 	self->timer->CNT = 0;
 	
+	self->pulse_width = 0;
 	self->v1 = 0;
 	self->v2 = 0;
 	
 	self->edge = false;
 	self->done = false;
+	
+	self->active = true;
 	
 	gpio_write(self->trig.block, self->trig.pin, true);
 	delay_us(10);
@@ -146,10 +159,6 @@ float ultrasonic_read(ultrasonic_t *self) {
 	while (!self->done)
 		if (systick_get() - start_ts > 60)
 			return -1.0f;
-	uint32_t ts = systick_get() - start_ts;
 		
-	uint32_t pulse_width = self->v2 >= self->v1 ? 
-		self->v2 - self->v1 : (0xFFFFFFFF - self->v1) + self->v2 + 1;
-		
-	return pulse_width / 58.0f;
+	return self->pulse_width / 58.0f;
 }

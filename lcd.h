@@ -32,7 +32,7 @@ typedef struct {
 	uint8_t d7_pin;
 } lcd_t;
 
-/// Function for initializing an LCD using its respective pin numbers and GPIO
+/// Function for initializing an LCD using its respective pin numbers and GPIO.
 lcd_t lcd_def(
 	GPIO_TypeDef *rs_block, uint8_t rs_pin, 
 	GPIO_TypeDef *en_block, uint8_t en_pin, 

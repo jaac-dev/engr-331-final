@@ -1,35 +1,40 @@
 #include "lcd.h"
 
-
-lcd_t lcd_def(GPIO_TypeDef *lcd_gpio, uint8_t rs, uint8_t en, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7) {
+lcd_t lcd_def(
+	GPIO_TypeDef *rs_block, uint8_t rs_pin, 
+	GPIO_TypeDef *en_block, uint8_t en_pin, 
+	GPIO_TypeDef *d4_block, uint8_t d4_pin,
+	GPIO_TypeDef *d5_block, uint8_t d5_pin,
+	GPIO_TypeDef *d6_block, uint8_t d6_pin,
+	GPIO_TypeDef *d7_block, uint8_t d7_pin
+) {
 	// Configure the pins.
-	gpio_configure_out(lcd_gpio, rs);
-	gpio_configure_out(lcd_gpio, en);
-	gpio_configure_out(lcd_gpio, d4);
-	gpio_configure_out(lcd_gpio, d5);
-	gpio_configure_out(lcd_gpio, d6);
-	gpio_configure_out(lcd_gpio, d7);
+	gpio_configure_out(rs_block, rs_pin);
+	gpio_configure_out(en_block, en_pin);
+	gpio_configure_out(d4_block, d4_pin);
+	gpio_configure_out(d5_block, d5_pin);
+	gpio_configure_out(d6_block, d6_pin);
+	gpio_configure_out(d7_block, d7_pin);
 	
 	// Setup the LCD.
-	lcd_t lcd_a;
-	lcd_a.rs_block = lcd_gpio;
-	lcd_a.rs_pin = rs;
-	lcd_a.en_block = lcd_gpio;
-	lcd_a.en_pin = en;
-	lcd_a.d4_block = lcd_gpio;
-	lcd_a.d4_pin = d4;
-	lcd_a.d5_block = lcd_gpio;
-	lcd_a.d5_pin = d5;
-	lcd_a.d6_block = lcd_gpio;
-	lcd_a.d6_pin = d6;
-	lcd_a.d7_block = lcd_gpio;
-	lcd_a.d7_pin = d7;
+	lcd_t lcd;
+	lcd.rs_block = rs_block;
+	lcd.rs_pin = rs_pin;
+	lcd.en_block = en_block;
+	lcd.en_pin = en_pin;
+	lcd.d4_block = d4_block;
+	lcd.d4_pin = d4_pin;
+	lcd.d5_block = d5_block;
+	lcd.d5_pin = d5_pin;
+	lcd.d6_block = d6_block;
+	lcd.d6_pin = d6_pin;
+	lcd.d7_block = d7_block;
+	lcd.d7_pin = d7_pin;
 
-	lcd_init(&lcd_a); 
+	lcd_init(&lcd); 
 	
-	return lcd_a;
+	return lcd;
 }
-
 
 void lcd_init(lcd_t *self) {
 	// Initialize by instruction to get into 4-bit mode.

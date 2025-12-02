@@ -38,6 +38,51 @@ static inline IRQn_Type gpio_exti_line_to_irq(uint8_t line) {
   }
 }
 
+/// Maps a block and pin to it's analog channel for ADC1. Returns -1 if no mapping exists.
+static inline int8_t gpio_analog_channel(GPIO_TypeDef *block, uint8_t pin) {
+	if (block == GPIOA) {
+		switch (pin) {
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+				return pin;
+			default:
+				return -1;
+		}
+	}
+	
+	if (block == GPIOB) {
+		switch (pin) {
+			case 0:
+			case 1:
+				return pin + 8;
+			default:
+				return -1;
+		}
+	}
+	
+	if (block == GPIOC) {
+		switch (pin) {
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+				return pin + 10;
+			default:
+				return -1;
+		}
+	}
+	
+	return -1;
+}
+
 void gpio_configure_out(GPIO_TypeDef *block, uint8_t pin) {
 	gpio_enable_clock(block);
 	
@@ -46,11 +91,24 @@ void gpio_configure_out(GPIO_TypeDef *block, uint8_t pin) {
 }
 
 void gpio_configure_in(GPIO_TypeDef *block, uint8_t pin, gpio_pupd_t pupd) {
-	uint32_t pos = pin * 2u;
-  block->MODER &= ~(0x3u << pos);
-  block->PUPDR &= ~(0x3u << pos);
-	if (pupd == PUPD_PULL_UP) block->PUPDR |= (0x1u << pos);
-  else if (pupd == PUPD_PULL_DOWN) block->PUPDR |= (0x2u << pos);
+	gpio_enable_clock(block);
+	
+	uint32_t pos = pin * 2;
+  block->MODER &= ~(3 << pos);
+  block->PUPDR &= ~(3 << pos);
+	if (pupd == PUPD_PULL_UP) block->PUPDR |= (1 << pos);
+  else if (pupd == PUPD_PULL_DOWN) block->PUPDR |= (2 << pos);
+}
+
+void gpio_configure_in_analog(GPIO_TypeDef *block, uint8_t pin) {
+	int8_t channel = gpio_analog_channel(block, pin);
+	if (channel == -1)
+		return;
+	
+	gpio_enable_clock(block);
+	
+	uint32_t pos = pin * 2;
+	block->MODER |= 3 << pos; // Analog mode.
 }
 
 void gpio_write(GPIO_TypeDef *block, uint8_t pin, bool value) {
@@ -62,6 +120,10 @@ void gpio_write(GPIO_TypeDef *block, uint8_t pin, bool value) {
 
 bool gpio_read(GPIO_TypeDef *block, uint8_t pin) {
 	return (block->IDR & (0b1 << pin)) != 0;
+}
+
+uint16_t gpio_read_analog(GPIO_TypeDef *block, uint8_t pin) {
+	
 }
 
 void gpio_configure_interrupt(
