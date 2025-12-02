@@ -1,7 +1,4 @@
 #include "ultrasonic.h"
-#include "gpio.h"
-#include "systick.h"
-#include "delay.h"
 
 static inline uint32_t read_ccr(TIM_TypeDef *tim, uint8_t ch) {
   switch (ch) {
