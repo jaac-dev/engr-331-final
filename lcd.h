@@ -11,20 +11,6 @@
 #include "delay.h"
 #include "gpio.h"
 
-#define LCDa_RS 6
-#define LCDa_EN 7
-#define LCDa_D4 8
-#define LCDa_D5 9
-#define LCDa_D6 10
-#define LCDa_D7 11
-
-#define LCDb_RS 0
-#define LCDb_EN 1
-#define LCDb_D4 2
-#define LCDb_D5 3
-#define LCDb_D6 4
-#define LCDb_D7 5
-
 /// The configuration structure used for LCD functions.
 typedef struct {
 	GPIO_TypeDef *rs_block;
@@ -47,7 +33,14 @@ typedef struct {
 } lcd_t;
 
 /// Function for initializing an LCD using its respective pin numbers and GPIO
-lcd_t lcd_def(GPIO_TypeDef *lcd_gpio, uint8_t rs, uint8_t en, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7);
+lcd_t lcd_def(
+	GPIO_TypeDef *rs_block, uint8_t rs_pin, 
+	GPIO_TypeDef *en_block, uint8_t en_pin, 
+	GPIO_TypeDef *d4_block, uint8_t d4_pin,
+	GPIO_TypeDef *d5_block, uint8_t d5_pin,
+	GPIO_TypeDef *d6_block, uint8_t d6_pin,
+	GPIO_TypeDef *d7_block, uint8_t d7_pin
+);
 
 //=======================================//
 //            LCD: RAW ACCESS            //
