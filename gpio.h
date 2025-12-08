@@ -54,6 +54,9 @@ void gpio_configure_interrupt(
 	gpio_exti_cb_t callback
 );
 
+/// Configures the given GPIO pin as an alternate function.
+void gpio_configure_alternate(GPIO_TypeDef *block, uint8_t pin, uint8_t fn);
+
 /// Writes a value to the given GPIO pin on the given block.
 void gpio_write(GPIO_TypeDef *block, uint8_t pin, bool value);
 

@@ -1,4 +1,5 @@
 #include "gpio.h"
+#include "adc.h"
 
 // External Interrupt Callbacks.
 static gpio_exti_cb_t s_exti_callbacks[16] = {0};
@@ -123,7 +124,10 @@ bool gpio_read(GPIO_TypeDef *block, uint8_t pin) {
 }
 
 uint16_t gpio_read_analog(GPIO_TypeDef *block, uint8_t pin) {
+	int8_t channel = gpio_analog_channel(block, pin);
+	if (channel == -1) return 0;
 	
+	return adc_read(channel);
 }
 
 void gpio_configure_interrupt(
@@ -168,6 +172,20 @@ void gpio_configure_interrupt(
 	
 	// Store the callback.
 	s_exti_callbacks[pin] = callback;
+}
+
+void gpio_configure_alternate(GPIO_TypeDef *block, uint8_t pin, uint8_t fn) {
+	gpio_enable_clock(block);
+	
+	// Set the MODER register for the pin to "alternate function".
+	block->MODER &= ~(0b11 << (2 * pin));
+	block->MODER |= (0b10 << (2 * pin));
+
+	uint8_t afr_idx = pin / 8;
+	uint8_t afr_shift = (pin % 8) * 4;
+
+	block->AFR[afr_idx] &= ~(0b1111 << afr_shift);
+	block->AFR[afr_idx] |= ((fn & 0b1111) << afr_shift);
 }
 
 static inline void handle_line(uint8_t line) {

@@ -5,6 +5,8 @@
 #include "ultrasonic.h"
 #include "systick.h"
 #include "config.h"
+#include "adc.h"
+#include "servo.h"
 
 #include "core_cm4.h"
 
@@ -35,6 +37,9 @@ int main() {
 	
 	// Initialize the delay system.
 	delay_init();
+	
+	// Initialize the ADC system.
+	adc_init();
 	
 	// Initialize LCD A and LCD B.
 	g_lcd_a = lcd_def(
@@ -83,10 +88,24 @@ int main() {
 		
 		ultrasonic_init(&g_ultrasonic);
 	}
-		
+	
+	gpio_configure_in_analog(GPIOA, 2);
+	
+	// Servo
+	RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
+
+	// 600 = min, 1500 = center, max = 2400
+	servo_t servo;
+	servo.pwm_block = GPIOB;
+	servo.pwm_pin = 4;
+	servo.pwm_af = 2;
+	servo.timer = TIM3;
+
+	servo_init(&servo, 1500);
+	
 	__enable_irq();
 	
-	printf("Initialized!\n");
+	//printf("Initialized!\n");
 	
 	g_distance = 0.0f;
 	
@@ -102,6 +121,11 @@ int main() {
 			
 			lcd_command_clear(&g_lcd_a);
 			lcd_printf(&g_lcd_a, "Dist: %.2fcm", g_distance);
+			
+			// Check tilt sensor.
+			uint16_t light = gpio_read_analog(GPIOA, 2);
+			lcd_command_clear(&g_lcd_b);
+			lcd_printf(&g_lcd_b, "Light: %0.2fV", ((float) light / 4096.0f) * 3.f);
 		}
 	}
 	
