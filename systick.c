@@ -1,7 +1,5 @@
 #include "systick.h"
 
-#include <stm32f407xx.h>
-
 volatile uint32_t s_ticks = 0;
 
 void systick_init() {

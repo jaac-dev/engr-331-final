@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stm32f407xx.h>
 
 void systick_init();
 

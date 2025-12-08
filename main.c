@@ -12,6 +12,17 @@
 
 #include <stdio.h>
 
+
+uint8_t active_key;
+const char KEYPAD_LAYOUT[12] = {'1', '2', '3',
+																'4', '5', '6', 
+																'7', '8', '9', 
+																'*', '0', '#'};
+
+void col1_handler();
+void col2_handler();
+void col3_handler();
+
 int fputc(int ch, FILE *f) {
 	(void) f;
 	ITM_SendChar((uint32_t)ch);   // goes out on SWO
@@ -42,7 +53,7 @@ int main() {
 	adc_init();
 	
 	// Initialize LCD A and LCD B.
-	g_lcd_a = lcd_def(
+	g_lcd_b = lcd_def(
 		LCD_A_RS_BLOCK, LCD_A_RS_PIN,
 		LCD_A_EN_BLOCK, LCD_A_EN_PIN,
 		LCD_A_D4_BLOCK, LCD_A_D4_PIN,
@@ -51,7 +62,7 @@ int main() {
 		LCD_A_D7_BLOCK, LCD_A_D7_PIN
 	);
 	
-	g_lcd_b = lcd_def(
+	g_lcd_a = lcd_def(
 		LCD_B_RS_BLOCK, LCD_B_RS_PIN,
 		LCD_B_EN_BLOCK, LCD_B_EN_PIN,
 		LCD_B_D4_BLOCK, LCD_B_D4_PIN,
@@ -65,8 +76,8 @@ int main() {
 	lcd_command_clear(&g_lcd_b);
 	
 	// Configure keypad
-	//keypad_init();
-	//keypad_interrupt(col1_handler,col2_handler,col3_handler); // interrupt config.
+	keypad_init();
+	keypad_interrupt(col1_handler,col2_handler,col3_handler); // interrupt config.
 	
 	// Initialize the ultrasonic sensor.
 	{
@@ -105,13 +116,12 @@ int main() {
 	
 	__enable_irq();
 	
-	//printf("Initialized!\n");
-	
 	g_distance = 0.0f;
 	
 	// Main loop.
 	while (1) {
 		// Capture the current time.
+		
 		uint32_t current_time = systick_get();
 		
 		// Check if we need to poll distance.
@@ -127,6 +137,16 @@ int main() {
 			lcd_command_clear(&g_lcd_b);
 			lcd_printf(&g_lcd_b, "Light: %0.2fV", ((float) light / 4096.0f) * 3.f);
 		}
+		
+		if (active_key != 0) {
+			if (active_key == 10)
+				lcd_command_clear(&g_lcd_b);
+			else if (active_key == 12)
+				lcd_print(&g_lcd_b,":)");
+			else	
+				lcd_print_char(&g_lcd_b,KEYPAD_LAYOUT[active_key-1]);
+			active_key = 0;
+		}
 	}
 	
 	return 0;
@@ -138,3 +158,22 @@ void TIM2_IRQHandler() {
 		TIM2->SR &= ~TIM_SR_CC1IF;
 	}
 }
+
+void col1_handler() {
+	uint8_t scan = keypad_scan(1,c1);
+	if (keypad_debounce(c1))
+		active_key = scan;
+}
+
+void col2_handler(){
+	uint8_t scan = keypad_scan(2,c2);
+	if (keypad_debounce(c2))
+		active_key = scan;
+}
+
+void col3_handler(){
+	uint8_t scan = keypad_scan(3,c3);
+	if (keypad_debounce(c3))
+		active_key = scan;
+}
+	

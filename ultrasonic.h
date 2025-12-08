@@ -1,8 +1,11 @@
 #pragma once
 
 #include <stm32f407xx.h>
-
 #include <stdbool.h>
+
+#include "gpio.h"
+#include "systick.h"
+#include "delay.h"
 
 typedef struct {
 	GPIO_TypeDef *block;
